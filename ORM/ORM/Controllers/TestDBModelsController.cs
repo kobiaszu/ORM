@@ -46,7 +46,7 @@ namespace ORM.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Prop")] TestDBModel testDBModel)
+        public ActionResult Create(TestDBModel testDBModel)
         {
             if (ModelState.IsValid)
             {
@@ -78,7 +78,7 @@ namespace ORM.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Prop")] TestDBModel testDBModel)
+        public ActionResult Edit(TestDBModel testDBModel)
         {
             if (ModelState.IsValid)
             {

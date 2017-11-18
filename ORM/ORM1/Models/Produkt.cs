@@ -11,5 +11,6 @@ namespace ORM1.Models
         public string Nazwa { get; set; }
         public int ilosc { get; set; }
         public DateTime Data { get; set; }
+        public DateTime LastModification { get; set; }
     }
 }

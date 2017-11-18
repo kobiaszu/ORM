@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace ORM1.Controllers
+namespace Formulka.Controllers
 {
     public class HomeController : Controller
     {

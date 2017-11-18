@@ -46,12 +46,13 @@ namespace ORM1.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Nazwa,ilosc")] Produkt produkt)
+        public ActionResult Create(Produkt produkt)
         {
             if (ModelState.IsValid)
             {
                 DateTime thisDay = DateTime.UtcNow;
                 produkt.Data = thisDay;
+                produkt.LastModification = thisDay;
 
                 db.Zakupy.Add(produkt);
                 db.SaveChanges();
@@ -81,10 +82,12 @@ namespace ORM1.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Nazwa,ilosc,Data")] Produkt produkt)
+        public ActionResult Edit(Produkt produkt)
         {
             if (ModelState.IsValid)
             {
+                produkt.LastModification = DateTime.UtcNow;
+
                 db.Entry(produkt).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
