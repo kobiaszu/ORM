@@ -47,7 +47,12 @@ namespace Formulka.Repository
         {
             using (var context = new KwestioDBContext())
             {
+                if ( context.Entry(entity).State == EntityState.Detached)
+                {
+                    context.Set<T>().Attach(entity);
+                }
                 context.Set<T>().Remove(entity);
+                context.SaveChanges();
             }
         }
 
