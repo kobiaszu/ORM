@@ -8,17 +8,27 @@ using System.Web;
 using System.Web.Mvc;
 using Formulka.Models;
 using System.Net.Mail;
+using Formulka.Service;
+using Formulka.Repository;
 
 namespace Formulka.Controllers
 {
     public class KwestiosController : Controller
     {
-        private KwestioDBContext db = new KwestioDBContext();
+
+        private EmailService _emailService;
+        private ContactFormRepository _contactRepository;
+
+        public KwestiosController()
+        {
+            _emailService = new EmailService();
+            _contactRepository = new ContactFormRepository();
+        }
 
         // GET: Kwestios
         public ActionResult Index()
         {
-            return View(db.Kwestionariusze.ToList());
+            return View(_contactRepository.GetWhere(x => x.ID>0)); //Get all recods that have IDs
         }
 
         // GET: Kwestios/Details/5
@@ -28,7 +38,7 @@ namespace Formulka.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Kwestio kwestio = db.Kwestionariusze.Find(id);
+            Kwestio kwestio = _contactRepository.GetWhere(x => x.ID == id.Value).FirstOrDefault();
             if (kwestio == null)
             {
                 return HttpNotFound();
@@ -49,47 +59,21 @@ namespace Formulka.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ID,Email,Subject,Description")] Kwestio kwestio)
         {
-            SendEmail(kwestio);
+            
 
             if (ModelState.IsValid)
             {
-                db.Kwestionariusze.Add(kwestio);
-                db.SaveChanges();
+                _contactRepository.Create(kwestio);
+                //db.Kwestionariusze.Add(kwestio);
+                //db.SaveChanges();
+                var message = _emailService.CreateMailMessage(kwestio);
+                _emailService.SendEMail(message);
+
+
                 return RedirectToAction("Index");
             }
 
             return View(kwestio);
-        }
-
-        private void SendEmail(Kwestio kwestio)
-        {
-            {
-                var smtpClient = new SmtpClient
-                {
-                    Host = "smtp.gmail.com",
-                    Port = 587,
-                    EnableSsl = true,
-                    UseDefaultCredentials = true,
-                    Credentials =
-                    new NetworkCredential("gym550182@gmail.com", "!QAZ2wsx#EDC")
-                };
-
-                var BodyMessage = "from " + kwestio.Email.ToString() + ": " + kwestio.Description;
-
-                var mailMessage = new MailMessage
-                {
-                    Sender = new MailAddress("gym550182@gmail.com"),
-                    From = new MailAddress("gym550182@gmail.com"),
-                    To = { "kobiaszu@gmail.com" },
-                    Subject = kwestio.Subject,
-                    Body = BodyMessage,
-                    IsBodyHtml = true
-                };
-
-                smtpClient.Send(mailMessage);
-            }
-
-
         }
 
         // GET: Kwestios/Edit/5
@@ -99,7 +83,9 @@ namespace Formulka.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Kwestio kwestio = db.Kwestionariusze.Find(id);
+
+
+            Kwestio kwestio = _contactRepository.GetWhere(x => x.ID == id.Value).FirstOrDefault();
             if (kwestio == null)
             {
                 return HttpNotFound();
@@ -118,8 +104,10 @@ namespace Formulka.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(kwestio).State = EntityState.Modified;
-                db.SaveChanges();
+                _contactRepository.Update(kwestio);
+
+                //db.Entry(kwestio).State = EntityState.Modified;
+                //db.SaveChanges();
                 return RedirectToAction("Index");
             }
             return View(kwestio);
@@ -132,7 +120,7 @@ namespace Formulka.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Kwestio kwestio = db.Kwestionariusze.Find(id);
+            Kwestio kwestio = _contactRepository.GetWhere(x => x.ID == id.Value).FirstOrDefault();
             if (kwestio == null)
             {
                 return HttpNotFound();
@@ -145,19 +133,18 @@ namespace Formulka.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Kwestio kwestio = db.Kwestionariusze.Find(id);
-            db.Kwestionariusze.Remove(kwestio);
-            db.SaveChanges();
+            Kwestio kwestio = _contactRepository.GetWhere(x => x.ID == id).FirstOrDefault();
+            _contactRepository.Delete(kwestio);
             return RedirectToAction("Index");
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
     }
 }
